@@ -1,4 +1,4 @@
-# 🧠 Brain Activation Visualizer
+#  Brain Activation Visualizer
 
 A full-stack application that uses **Meta's TRIBE v2** model to predict and visualize how the human brain responds to video content in real-time. Load any video, scrub through the timeline, and see which brain regions activate — with 3D brain surface maps and per-region time-series charts.
 
