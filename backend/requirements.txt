@@ -1,0 +1,25 @@
+# Core
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+pydantic>=2.0
+
+# TRIBE v2 (install separately via git)
+# pip install "tribev2[plotting] @ git+https://github.com/facebookresearch/tribev2.git"
+
+# Brain visualization
+nilearn>=0.10.0
+nibabel>=5.0.0
+matplotlib>=3.7.0
+pyvista>=0.42.0
+
+# Data
+numpy>=1.24.0
+scipy>=1.10.0
+
+# AI Interpretation (optional)
+anthropic>=0.40.0
+# openai>=1.0.0
+
+# Utils
+Pillow>=10.0.0
