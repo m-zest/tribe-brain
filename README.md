@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧠 Neural Content Analyzer
+# Neural Content Analyzer
 
 ### See How Content Affects Your Brain
 
@@ -18,41 +18,41 @@
 
 <br />
 
-*Load any video → TRIBE v2 predicts fMRI brain responses at 1-second resolution → Explore activation patterns across 6 neural networks in real-time*
+*Load any video — TRIBE v2 predicts fMRI brain responses at 1-second resolution — Explore activation patterns across 6 neural networks in real-time*
 
 ---
 
-[**Getting Started**](#-getting-started) · [**Features**](#-features) · [**How It Works**](#-how-it-works) · [**Brain Networks**](#-brain-networks) · [**API Reference**](#-api-reference) · [**Architecture**](#-architecture)
+[**Getting Started**](#getting-started) · [**Features**](#features) · [**How It Works**](#how-it-works) · [**Brain Networks**](#brain-networks) · [**API Reference**](#api-reference) · [**Architecture**](#architecture)
 
 </div>
 
 <br />
 
-## ✨ Features
+## Features
 
 <table>
 <tr>
 <td width="50%">
 
-### 🎯 Compare Mode
+### Compare Mode
 Stack multiple videos side-by-side to compare brain activation patterns. See which content drives more engagement, emotion, or attention — with per-network delta metrics.
 
-### 🖥️ Monitor Mode
+### Monitor Mode
 Real-time video playback synced with brain surface maps. Scrub through any moment and instantly see the neural response.
 
-### 🧬 4-View Brain Surface Maps
+### 4-View Brain Surface Maps
 Lateral and medial views of both hemispheres, rendered with nilearn's `cold_hot` colormap on fsaverage5 surface. Updates in real-time as you scrub.
 
 </td>
 <td width="50%">
 
-### 📊 6-Network Activation Charts
+### 6-Network Activation Charts
 Interactive time-series for Attention, Auditory, Emotion/Memory, Language, Motor, and Visual networks. Click anywhere to jump to that timestep.
 
-### ✂️ B-Roll Marker System
+### B-Roll Marker System
 Mark high-activation segments directly on the timeline. Export clips for use as background footage in your edits.
 
-### 🤖 AI Interpretation Agent
+### AI Interpretation Agent
 Optional LLM-powered analysis at each timestep — explains which brain regions are active, what's happening in the video, and what it might mean.
 
 </td>
@@ -61,7 +61,7 @@ Optional LLM-powered analysis at each timestep — explains which brain regions 
 
 <br />
 
-## 🖼️ Screenshots
+## Screenshots
 
 <div align="center">
 
@@ -77,7 +77,7 @@ Optional LLM-powered analysis at each timestep — explains which brain regions 
 
 <br />
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -145,7 +145,7 @@ http://localhost:5173
 
 <br />
 
-## 🧪 How It Works
+## How It Works
 
 ```
                          ┌──────────────────────────┐
@@ -199,29 +199,29 @@ http://localhost:5173
 3. **Audio Features** — Wav2Vec-BERT processes the audio signal
 4. **TRIBE v2 Inference** — All features are fused and passed through Meta's brain encoding model, producing vertex-wise predictions on the fsaverage5 cortical surface (~20,484 vertices) at each 1-second timestep (TR)
 5. **ROI Extraction** — Vertex-level predictions are aggregated into 6 functional brain networks using Yeo 7-network parcellation + Destrieux atlas
-6. **Brain Rendering** — nilearn generates 4-view surface map PNGs (lateral/medial × left/right) for every timestep
+6. **Brain Rendering** — nilearn generates 4-view surface map PNGs (lateral/medial x left/right) for every timestep
 7. **Caching** — All results cached to disk for instant subsequent loads
 
 > **Performance:** ~2-5 minutes per minute of video on a modern GPU. Results are cached permanently.
 
 <br />
 
-## 🧠 Brain Networks
+## Brain Networks
 
 The analyzer tracks 6 functional brain networks derived from standard neuroscience parcellations:
 
 | Network | Color | Brain Regions | What It Indicates |
 |:--------|:------|:-------------|:-----------------|
-| **Attention** | 🟦 Cyan | Dorsal/ventral attention networks (Yeo 4, 5) | Focused engagement, salience detection, sustained attention |
-| **Auditory** | 🟩 Green | Superior temporal gyrus, auditory cortex | Sound processing, speech perception, music |
-| **Emotion / Memory** | 🟪 Pink | Default mode + limbic networks | Emotional response, autobiographical memory, self-referential thought |
-| **Language** | 🟨 Yellow | Broca's area, Wernicke's area, angular gyrus | Speech comprehension, semantic processing, reading |
-| **Motor** | 🟥 Red | Somatomotor cortex, premotor areas | Movement perception, action planning, motor simulation |
-| **Visual** | 🔵 Blue | Occipital cortex, fusiform gyrus | Visual processing, object recognition, scene understanding |
+| **Attention** | Cyan | Dorsal/ventral attention networks (Yeo 4, 5) | Focused engagement, salience detection, sustained attention |
+| **Auditory** | Green | Superior temporal gyrus, auditory cortex | Sound processing, speech perception, music |
+| **Emotion / Memory** | Pink | Default mode + limbic networks | Emotional response, autobiographical memory, self-referential thought |
+| **Language** | Yellow | Broca's area, Wernicke's area, angular gyrus | Speech comprehension, semantic processing, reading |
+| **Motor** | Red | Somatomotor cortex, premotor areas | Movement perception, action planning, motor simulation |
+| **Visual** | Blue | Occipital cortex, fusiform gyrus | Visual processing, object recognition, scene understanding |
 
 <br />
 
-## 📡 API Reference
+## API Reference
 
 The backend exposes a RESTful API via FastAPI:
 
@@ -264,7 +264,7 @@ curl "http://localhost:8080/api/compare?video_ids=abc123,def456"
 
 <br />
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 neural-content-analyzer/
@@ -312,7 +312,7 @@ neural-content-analyzer/
 
 <br />
 
-## ⚙️ Configuration
+## Configuration
 
 Edit `backend/config.py` to customize:
 
@@ -338,7 +338,7 @@ ANTHROPIC_API_KEY = ""              # Set via env var
 
 <br />
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 <table>
 <tr>
@@ -374,7 +374,7 @@ Wav2Vec-BERT · LLaMA 3.2
 
 <br />
 
-## 📋 Scripts
+## Scripts
 
 ### Batch Processing
 
@@ -398,9 +398,9 @@ python scripts/export_clips.py --markers markers.json
 
 <br />
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome. Please feel free to submit a Pull Request.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
@@ -410,7 +410,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 <br />
 
-## 📄 License
+## License
 
 This project uses Meta's TRIBE v2 under **CC-BY-NC-4.0** (non-commercial use only).
 
