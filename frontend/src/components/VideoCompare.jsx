@@ -9,7 +9,6 @@ export default function VideoCompare({ videoIds, currentTimestep, onTimestepChan
 
   useEffect(() => {
     if (!videoIds || videoIds.length < 2) return
-
     const fetchCompare = async () => {
       setLoading(true)
       try {
@@ -36,29 +35,6 @@ export default function VideoCompare({ videoIds, currentTimestep, onTimestepChan
     )
   }
 
-  // Compute difference metrics
-  const computeDifference = (activationsA, activationsB) => {
-    if (!activationsA || !activationsB) return null
-
-    const diff = {}
-    for (const key of Object.keys(activationsA)) {
-      const valsA = activationsA[key] || []
-      const valsB = activationsB[key] || []
-      const maxLen = Math.min(valsA.length, valsB.length)
-
-      const meanA = valsA.slice(0, maxLen).reduce((s, v) => s + v, 0) / maxLen
-      const meanB = valsB.slice(0, maxLen).reduce((s, v) => s + v, 0) / maxLen
-
-      diff[key] = {
-        meanA: meanA,
-        meanB: meanB,
-        difference: meanA - meanB,
-        absChange: Math.abs(meanA - meanB),
-      }
-    }
-    return diff
-  }
-
   const entries = Object.entries(compareData)
   const [idA, dataA] = entries[0] || []
   const [idB, dataB] = entries[1] || []
@@ -71,53 +47,35 @@ export default function VideoCompare({ videoIds, currentTimestep, onTimestepChan
     )
   }
 
-  const diff = computeDifference(dataA.roi_activations, dataB.roi_activations)
+  const computeMean = (vals) => {
+    if (!vals?.length) return 0
+    return vals.reduce((s, v) => s + v, 0) / vals.length
+  }
+
+  const diff = {}
+  for (const key of Object.keys(dataA.roi_activations)) {
+    const meanA = computeMean(dataA.roi_activations[key])
+    const meanB = computeMean(dataB.roi_activations[key])
+    diff[key] = { meanA, meanB, difference: meanA - meanB }
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* Summary comparison */}
-      <div className="chart-panel" style={{ padding: 16 }}>
-        <h3 style={{ fontSize: 13, marginBottom: 12 }}>Network Comparison Summary</h3>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 8,
-        }}>
-          {diff && Object.entries(diff).map(([key, d]) => {
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div className="summary-section" style={{ margin: 0 }}>
+        <h3>Network Comparison Summary</h3>
+        <div className="summary-grid">
+          {Object.entries(diff).map(([key, d]) => {
             const config = dataA.roi_config?.[key] || {}
             return (
-              <div key={key} style={{
-                background: 'var(--bg-card)',
-                borderRadius: 'var(--radius)',
-                padding: '10px 12px',
-                borderLeft: `3px solid ${config.color || '#888'}`,
-              }}>
-                <div style={{
-                  fontSize: 11, color: 'var(--text-muted)', marginBottom: 4,
-                }}>
-                  {config.label || key}
+              <div key={key} className="summary-card" style={{ borderLeftColor: config.color || '#888' }}>
+                <div className="network-label">{config.label || key}</div>
+                <div className="values-row">
+                  <span className="value">{d.meanA.toFixed(4)}</span>
+                  <span className="vs">vs</span>
+                  <span className="value">{d.meanB.toFixed(4)}</span>
                 </div>
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'baseline',
-                }}>
-                  <span style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--text-primary)',
-                  }}>
-                    {d.meanA.toFixed(4)}
-                  </span>
-                  <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>vs</span>
-                  <span style={{
-                    fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--text-primary)',
-                  }}>
-                    {d.meanB.toFixed(4)}
-                  </span>
-                </div>
-                <div style={{
-                  fontSize: 10, marginTop: 4,
-                  color: d.difference > 0 ? 'var(--accent-green)' : 'var(--accent-red)',
-                  fontFamily: 'var(--font-mono)',
-                }}>
-                  Δ {d.difference > 0 ? '+' : ''}{d.difference.toFixed(4)}
+                <div className={`delta ${d.difference >= 0 ? 'positive' : 'negative'}`}>
+                  {'\u0394'} {d.difference >= 0 ? '+' : ''}{d.difference.toFixed(4)}
                 </div>
               </div>
             )
@@ -125,8 +83,7 @@ export default function VideoCompare({ videoIds, currentTimestep, onTimestepChan
         </div>
       </div>
 
-      {/* Side-by-side charts */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <RegionChart
           title={dataA.metadata?.filename || `Video ${idA}`}
           roiActivations={dataA.roi_activations}

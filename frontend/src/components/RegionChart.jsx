@@ -11,20 +11,17 @@ export default function RegionChart({
   currentTimestep,
   onTimestepClick,
   nTimesteps,
+  tall = false,
 }) {
   const [disabledNetworks, setDisabledNetworks] = useState(new Set())
 
-  // Transform data for Recharts
   const chartData = useMemo(() => {
     if (!roiActivations) return []
-
     const data = []
     for (let t = 0; t < nTimesteps; t++) {
       const point = { time: t }
       for (const [key, vals] of Object.entries(roiActivations)) {
-        if (t < vals.length) {
-          point[key] = vals[t]
-        }
+        if (t < vals.length) point[key] = vals[t]
       }
       data.push(point)
     }
@@ -34,11 +31,8 @@ export default function RegionChart({
   const toggleNetwork = (key) => {
     setDisabledNetworks(prev => {
       const next = new Set(prev)
-      if (next.has(key)) {
-        next.delete(key)
-      } else {
-        next.add(key)
-      }
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
       return next
     })
   }
@@ -51,39 +45,41 @@ export default function RegionChart({
 
   const networks = roiConfig ? Object.entries(roiConfig) : []
 
-  // Custom tooltip
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null
     return (
       <div style={{
-        background: 'var(--bg-card)',
+        background: 'var(--bg-elevated)',
         border: '1px solid var(--border-bright)',
-        borderRadius: 'var(--radius)',
-        padding: '8px 12px',
+        borderRadius: 'var(--radius-md)',
+        padding: '10px 14px',
         fontSize: 11,
         fontFamily: 'var(--font-mono)',
+        boxShadow: 'var(--shadow-lg)',
+        backdropFilter: 'blur(8px)',
       }}>
-        <div style={{ color: 'var(--text-muted)', marginBottom: 4 }}>
-          t={label}s
+        <div style={{ color: 'var(--text-muted)', marginBottom: 6, fontWeight: 600 }}>
+          t = {label}s
         </div>
         {payload
           .filter(p => !disabledNetworks.has(p.dataKey))
           .sort((a, b) => Math.abs(b.value) - Math.abs(a.value))
           .map(p => (
             <div key={p.dataKey} style={{
-              display: 'flex', alignItems: 'center', gap: 6, marginTop: 2,
+              display: 'flex', alignItems: 'center', gap: 8, marginTop: 3,
             }}>
               <span style={{
-                width: 6, height: 6, borderRadius: '50%',
-                background: p.color, display: 'inline-block',
+                width: 8, height: 8, borderRadius: 2,
+                background: p.color, display: 'inline-block', flexShrink: 0,
               }} />
-              <span style={{ color: 'var(--text-secondary)', minWidth: 90 }}>
+              <span style={{ color: 'var(--text-secondary)', minWidth: 95, fontSize: 10 }}>
                 {roiConfig?.[p.dataKey]?.label || p.dataKey}
               </span>
               <span style={{
                 color: p.value > 0.03 ? 'var(--accent-green)' :
                        p.value < -0.03 ? 'var(--accent-red)' : 'var(--text-muted)',
-                fontWeight: 600,
+                fontWeight: 700,
+                fontSize: 11,
               }}>
                 {p.value.toFixed(4)}
               </span>
@@ -97,20 +93,8 @@ export default function RegionChart({
     <div className="chart-panel">
       <div className="chart-header">
         <h3>{title}</h3>
-        <div className="chart-legend">
-          {networks.map(([key, cfg]) => (
-            <div
-              key={key}
-              className={`legend-item ${disabledNetworks.has(key) ? 'disabled' : ''}`}
-              onClick={() => toggleNetwork(key)}
-            >
-              <span className="legend-dot" style={{ background: cfg.color }} />
-              <span>{cfg.label}</span>
-            </div>
-          ))}
-        </div>
       </div>
-      <div className="chart-body">
+      <div className={`chart-body ${tall ? 'tall' : ''}`}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={chartData}
@@ -119,15 +103,15 @@ export default function RegionChart({
           >
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="var(--border)"
+              stroke="var(--border-subtle)"
               vertical={false}
             />
             <XAxis
               dataKey="time"
               stroke="var(--text-muted)"
-              tick={{ fontSize: 10, fontFamily: 'var(--font-mono)' }}
+              tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: 'var(--text-muted)' }}
               tickLine={false}
-              axisLine={{ stroke: 'var(--border)' }}
+              axisLine={{ stroke: 'var(--border-default)' }}
               interval="preserveStartEnd"
               tickFormatter={(v) => {
                 if (nTimesteps <= 60) return `${v}s`
@@ -138,15 +122,14 @@ export default function RegionChart({
             />
             <YAxis
               stroke="var(--text-muted)"
-              tick={{ fontSize: 10, fontFamily: 'var(--font-mono)' }}
+              tick={{ fontSize: 10, fontFamily: 'var(--font-mono)', fill: 'var(--text-muted)' }}
               tickLine={false}
-              axisLine={{ stroke: 'var(--border)' }}
+              axisLine={{ stroke: 'var(--border-default)' }}
               width={40}
-              tickFormatter={(v) => v.toFixed(2)}
+              tickFormatter={(v) => v.toFixed(1)}
             />
             <Tooltip content={<CustomTooltip />} />
 
-            {/* Current timestep indicator */}
             <ReferenceLine
               x={currentTimestep}
               stroke="var(--accent-red)"
@@ -154,10 +137,8 @@ export default function RegionChart({
               strokeDasharray="none"
             />
 
-            {/* Zero line */}
             <ReferenceLine y={0} stroke="var(--border-bright)" strokeDasharray="4 4" />
 
-            {/* Network lines */}
             {networks.map(([key, cfg]) => (
               <Line
                 key={key}
@@ -173,6 +154,18 @@ export default function RegionChart({
             ))}
           </LineChart>
         </ResponsiveContainer>
+      </div>
+      <div className="chart-legend">
+        {networks.map(([key, cfg]) => (
+          <div
+            key={key}
+            className={`legend-item ${disabledNetworks.has(key) ? 'disabled' : ''}`}
+            onClick={() => toggleNetwork(key)}
+          >
+            <span className="legend-dot" style={{ background: cfg.color }} />
+            <span>{cfg.label}</span>
+          </div>
+        ))}
       </div>
     </div>
   )

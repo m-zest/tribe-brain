@@ -11,8 +11,8 @@ const VIEW_ORDER = ['lateral_left', 'medial_left', 'medial_right', 'lateral_righ
 
 export default function BrainViewer({ images, loading, timestep }) {
   return (
-    <div className="brain-panel">
-      <div className="brain-views-grid">
+    <div style={{ height: '100%' }}>
+      <div className="brain-views-row" style={{ height: '100%' }}>
         {VIEW_ORDER.map(viewName => {
           const imgData = images?.[viewName]
           const label = VIEW_LABELS[viewName]

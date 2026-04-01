@@ -12,45 +12,26 @@ export default function VideoPlayer({
 }) {
   const animFrameRef = useRef(null)
 
-  // Sync playback
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-
-    if (isPlaying) {
-      video.play().catch(() => {})
-    } else {
-      video.pause()
-    }
+    if (isPlaying) video.play().catch(() => {})
+    else video.pause()
   }, [isPlaying, videoRef])
 
-  // Poll video time during playback
   useEffect(() => {
     if (!isPlaying) return
-
     const tick = () => {
-      if (videoRef.current) {
-        onTimeUpdate(videoRef.current.currentTime)
-      }
+      if (videoRef.current) onTimeUpdate(videoRef.current.currentTime)
       animFrameRef.current = requestAnimationFrame(tick)
     }
     animFrameRef.current = requestAnimationFrame(tick)
-
-    return () => {
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current)
-      }
-    }
+    return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current) }
   }, [isPlaying, onTimeUpdate, videoRef])
 
-  // Compute current stats from ROI data
   const getCurrentStats = () => {
     if (!roiActivations || currentTimestep < 0) return null
-
-    let maxVal = -Infinity
-    let minVal = Infinity
-    let maxNet = ''
-
+    let maxVal = -Infinity, minVal = Infinity, maxNet = ''
     for (const [key, vals] of Object.entries(roiActivations)) {
       if (currentTimestep < vals.length) {
         const v = vals[currentTimestep]
@@ -58,33 +39,17 @@ export default function VideoPlayer({
         if (v < minVal) minVal = v
       }
     }
-
     return { maxVal, minVal, maxNet }
   }
 
   const stats = getCurrentStats()
-
-  const formatTime = (seconds) => {
-    const m = Math.floor(seconds / 60)
-    const s = Math.floor(seconds % 60)
-    return `${m}:${s.toString().padStart(2, '0')}`
-  }
-
-  // Video source URL — served from backend static files
   const videoSrc = metadata?.filename ? `/videos/${metadata.filename}` : null
 
   return (
-    <div className="video-panel">
+    <>
       <div className="video-player-wrapper">
         {videoSrc ? (
-          <video
-            ref={videoRef}
-            src={videoSrc}
-            muted
-            playsInline
-            preload="auto"
-            style={{ background: '#000' }}
-          />
+          <video ref={videoRef} src={videoSrc} muted playsInline preload="auto" />
         ) : (
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -101,26 +66,26 @@ export default function VideoPlayer({
           <div className="label">Timestep</div>
         </div>
         <div className="stat-box">
-          <div className="value" style={{ fontSize: 14 }}>
-            {stats ? stats.maxVal.toFixed(4) : '—'}
+          <div className="value" style={{ fontSize: 13 }}>
+            {stats ? stats.maxVal.toFixed(4) : '\u2014'}
           </div>
-          <div className="label">Peak Activation</div>
+          <div className="label">Peak</div>
         </div>
         <div className="stat-box">
-          <div className="value" style={{ fontSize: 14 }}>
-            {stats ? stats.minVal.toFixed(4) : '—'}
+          <div className="value" style={{ fontSize: 13 }}>
+            {stats ? stats.minVal.toFixed(4) : '\u2014'}
           </div>
-          <div className="label">Min Activation</div>
+          <div className="label">Min</div>
         </div>
         <div className="stat-box">
-          <div className="value" style={{ fontSize: 11, letterSpacing: '0.02em' }}>
+          <div className="value" style={{ fontSize: 12 }}>
             {nTimesteps}
           </div>
           <div className="label">
-            Brain images · {metadata?.n_vertices?.toLocaleString() || '20,484'} vertices
+            {metadata?.n_vertices?.toLocaleString() || '20,484'} verts
           </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }

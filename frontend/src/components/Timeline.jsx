@@ -23,14 +23,12 @@ export default function Timeline({
     if (!track) return 0
     const rect = track.getBoundingClientRect()
     const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
-    const ratio = x / rect.width
-    return Math.round(ratio * (nTimesteps - 1))
+    return Math.round((x / rect.width) * (nTimesteps - 1))
   }, [nTimesteps])
 
   const handleMouseDown = (e) => {
     setIsDragging(true)
     const ts = getTimestepFromEvent(e)
-
     if (markingBroll) {
       if (brollStart === null) {
         setBrollStart(ts)
@@ -46,13 +44,10 @@ export default function Timeline({
 
   const handleMouseMove = (e) => {
     if (!isDragging || markingBroll) return
-    const ts = getTimestepFromEvent(e)
-    onTimestepChange(ts)
+    onTimestepChange(getTimestepFromEvent(e))
   }
 
-  const handleMouseUp = () => {
-    setIsDragging(false)
-  }
+  const handleMouseUp = () => setIsDragging(false)
 
   const formatTime = (timestep) => {
     const totalSeconds = duration > 0 ? (timestep / nTimesteps) * duration : timestep
@@ -69,50 +64,41 @@ export default function Timeline({
       onMouseLeave={handleMouseUp}
     >
       <div className="timeline-bar">
-        {/* Play/Pause */}
         <div className="timeline-controls">
           <button className="btn-control" onClick={onPlayPause} title={isPlaying ? 'Pause' : 'Play'}>
-            {isPlaying ? '⏸' : '▶'}
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              {isPlaying
+                ? <><rect x="6" y="4" width="4" height="16" /><rect x="14" y="4" width="4" height="16" /></>
+                : <polygon points="5,3 19,12 5,21" />
+              }
+            </svg>
           </button>
-
-          {/* Step backward */}
           <button
             className="btn-control"
             onClick={() => onTimestepChange(Math.max(0, currentTimestep - 1))}
-            title="Previous timestep"
+            title="Previous"
           >
-            ◀
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="19,20 9,12 19,4" /><rect x="5" y="4" width="3" height="16" />
+            </svg>
           </button>
-
-          {/* Step forward */}
           <button
             className="btn-control"
             onClick={() => onTimestepChange(Math.min(nTimesteps - 1, currentTimestep + 1))}
-            title="Next timestep"
+            title="Next"
           >
-            ▶
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5,4 15,12 5,20" /><rect x="16" y="4" width="3" height="16" />
+            </svg>
           </button>
         </div>
 
-        {/* Time display */}
-        <div className="timeline-time">
-          {formatTime(currentTimestep)} / {formatTime(nTimesteps - 1)}
-        </div>
+        <div className="timeline-time">{formatTime(currentTimestep)} / {formatTime(nTimesteps - 1)}</div>
 
-        {/* Scrubber */}
-        <div
-          className="timeline-scrubber"
-          ref={trackRef}
-          onMouseDown={handleMouseDown}
-        >
+        <div className="timeline-scrubber" ref={trackRef} onMouseDown={handleMouseDown}>
           <div className="timeline-track">
-            <div
-              className="timeline-progress"
-              style={{ width: `${progress}%` }}
-            />
+            <div className="timeline-progress" style={{ width: `${progress}%` }} />
           </div>
-
-          {/* B-roll markers */}
           {brollMarkers.map(marker => {
             const startPct = (marker.start / (nTimesteps - 1)) * 100
             const widthPct = ((marker.end - marker.start) / (nTimesteps - 1)) * 100
@@ -125,69 +111,52 @@ export default function Timeline({
               />
             )
           })}
-
-          {/* B-roll start marker (while marking) */}
           {markingBroll && brollStart !== null && (
-            <div
-              style={{
-                position: 'absolute',
-                left: `${(brollStart / (nTimesteps - 1)) * 100}%`,
-                top: 0,
-                height: '100%',
-                width: 2,
-                background: 'var(--accent-yellow)',
-                zIndex: 3,
-              }}
-            />
+            <div style={{
+              position: 'absolute',
+              left: `${(brollStart / (nTimesteps - 1)) * 100}%`,
+              top: 0, height: '100%', width: 2,
+              background: 'var(--accent-yellow)', zIndex: 3,
+            }} />
           )}
-
-          {/* Playhead handle */}
-          <div
-            className="timeline-handle"
-            style={{ left: `${progress}%` }}
-          />
+          <div className="timeline-handle" style={{ left: `${progress}%` }} />
         </div>
 
-        {/* Timestep display */}
-        <div className="timeline-time" style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>
+        <div className="timeline-time" style={{ fontSize: 11 }}>
           TR {currentTimestep} / {nTimesteps - 1}
         </div>
 
-        {/* Action buttons */}
         <div className="timeline-controls">
           <button
             className={`btn-control ${markingBroll ? 'active' : ''}`}
-            onClick={() => {
-              setMarkingBroll(!markingBroll)
-              setBrollStart(null)
-            }}
-            title="Mark B-roll clip"
+            onClick={() => { setMarkingBroll(!markingBroll); setBrollStart(null) }}
+            title="Mark B-roll"
           >
-            ✂️ B-roll
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+            B-roll
           </button>
-
-          <button
-            className="btn-control"
-            onClick={onInterpret}
-            title="Get AI interpretation of current timestep"
-          >
-            🧠 Interpret
+          <button className="btn-control" onClick={onInterpret} title="AI Interpretation">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
+            </svg>
+            Interpret
           </button>
         </div>
       </div>
 
-      {/* B-roll marking instructions */}
       {markingBroll && (
         <div style={{
-          marginTop: 8,
-          fontSize: 11,
+          marginTop: 8, fontSize: 11,
           color: 'var(--accent-yellow)',
           fontFamily: 'var(--font-mono)',
           textAlign: 'center',
         }}>
           {brollStart === null
-            ? '↑ Click on timeline to set B-roll start point'
-            : `Start: TR ${brollStart} — Click again to set end point`
+            ? 'Click on timeline to set B-roll start point'
+            : `Start: TR ${brollStart} \u2014 Click again to set end point`
           }
         </div>
       )}
